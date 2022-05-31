@@ -136,7 +136,19 @@ class OmniLogicTemperatureSensor(OmnilogicSensor):
     @property
     def native_value(self):
         """Return the native temperature returned."""
-        return self.coordinator.data[self._item_id][self._state_key]
+        sensor_data = self.coordinator.data[self._item_id][self._state_key]
+        if int(sensor_data) == -1:
+            return None
+        
+        return sensor_data
+
+    @property
+    def native_unit_of_measurement(self):
+        """Return the native unit of measure."""
+        if self._unit_type == "Metric":
+            return TEMP_CELSIUS
+        
+        return TEMP_FAHRENHEIT
 
 
 class OmniLogicPumpSpeedSensor(OmnilogicSensor):
