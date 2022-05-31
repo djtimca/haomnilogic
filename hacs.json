@@ -1,0 +1,7 @@
+{
+    "name": "Hayward Omnilogic",
+    "country": "CA",
+    "domains": ["binary_sensor", "light", "sensor", "switch", "water_heater"],
+    "homeassistant": "0.115.0",
+    "iot_class": ["Cloud Polling"]
+}
