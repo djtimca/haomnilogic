@@ -6,5 +6,6 @@
   "documentation": "https://www.home-assistant.io/integrations/omnilogic",
   "requirements": ["omnilogic==0.4.3"],
   "codeowners": ["@oliver84","@djtimca","@gentoosu"],
+  "issue_tracker": "https://github.com/djtimca/haomnilogic/issues", 
   "iot_class": "cloud_polling"
 }
