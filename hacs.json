@@ -1,6 +1,5 @@
 {
     "name": "Hayward Omnilogic",
     "country": "CA",
-    "homeassistant": "0.115.0",
-    "iot_class": ["Cloud Polling"]
+    "homeassistant": "0.115.0"
 }
