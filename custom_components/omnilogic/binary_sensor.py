@@ -2,16 +2,19 @@
 
 import logging
 
-from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.components.binary_sensor import BinarySensorDeviceClass, BinarySensorEntity
+from homeassistant.config_entries import ConfigEntry
 
-from .common import OmniLogicEntity, OmniLogicUpdateCoordinator
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+from .common import OmniLogicEntity, OmniLogicUpdateCoordinator, check_guard
 from .const import COORDINATOR, DOMAIN
 
-_LOGGER = logging.getLogger(__name__)
-
-
-async def async_setup_entry(hass, entry, async_add_entities):
-    """Set up the sensor platform."""
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
+    """Set up the binary sensor platform."""
 
     coordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR]
     entities = []
@@ -20,24 +23,13 @@ async def async_setup_entry(hass, entry, async_add_entities):
         id_len = len(item_id)
         item_kind = item_id[-2]
         entity_settings = BINARY_SENSOR_TYPES.get((id_len, item_kind))
-
+        
         if not entity_settings:
             continue
 
         for entity_setting in entity_settings:
             for state_key, entity_class in entity_setting["entity_classes"].items():
-                if state_key not in item:
-                    continue
-
-                guard = False
-                for guard_condition in entity_setting["guard_condition"]:
-                    if guard_condition and all(
-                        item.get(guard_key) == guard_value
-                        for guard_key, guard_value in guard_condition.items()
-                    ):
-                        guard = True
-
-                if guard:
+                if check_guard(state_key, item, entity_setting):
                     continue
 
                 entity = entity_class(
@@ -67,7 +59,7 @@ class OmnilogicSensor(OmniLogicEntity, BinarySensorEntity):
         icon: str,
         item_id: tuple,
         state_key: str,
-    ):
+    ) -> None:
         """Initialize Entities."""
         super().__init__(
             coordinator=coordinator,
@@ -159,7 +151,7 @@ BINARY_SENSOR_TYPES = {
             ],
         },
     ],
-    (6, "Heater"): [
+    (6, "Heaters"): [
         {
             "entity_classes": {"Alarms": OmniLogicAlarmSensor},
             "name": "Heater Alarm",

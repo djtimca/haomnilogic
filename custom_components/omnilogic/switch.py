@@ -1,21 +1,25 @@
-"""Platform for switch integration."""
-import logging
+"""Platform for Omnilogic switch integration."""
 import time
 
 from omnilogic import OmniLogicException
 import voluptuous as vol
 
 from homeassistant.components.switch import SwitchEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, entity_platform
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .common import OmniLogicEntity, OmniLogicUpdateCoordinator
+from .common import OmniLogicEntity, OmniLogicUpdateCoordinator, check_guard
 from .const import COORDINATOR, DOMAIN, PUMP_TYPES
 
-_LOGGER = logging.getLogger(__name__)
 SERVICE_SET_SPEED = "set_pump_speed"
+OMNILOGIC_SWITCH_OFF = 7
 
 
-async def async_setup_entry(hass, entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
     """Set up the light platform."""
 
     coordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR]
@@ -31,18 +35,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         for entity_setting in entity_settings:
             for state_key, entity_class in entity_setting["entity_classes"].items():
-                if state_key not in item:
-                    continue
-
-                guard = False
-                for guard_condition in entity_setting["guard_condition"]:
-                    if guard_condition and all(
-                        item.get(guard_key) == guard_value
-                        for guard_key, guard_value in guard_condition.items()
-                    ):
-                        guard = True
-
-                if guard:
+                if check_guard(state_key, item, entity_setting):
                     continue
 
                 entity = entity_class(
@@ -59,7 +52,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     async_add_entities(entities)
 
     # register service
-    platform = entity_platform.current_platform.get()
+    platform = entity_platform.async_get_current_platform()
 
     platform.async_register_entity_service(
         SERVICE_SET_SPEED,
@@ -69,7 +62,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 
 class OmniLogicSwitch(OmniLogicEntity, SwitchEntity):
-    """Define an Omnilogic Water Heater entity."""
+    """Define an Omnilogic Base Switch entity to be extended."""
 
     def __init__(
         self,
@@ -79,7 +72,7 @@ class OmniLogicSwitch(OmniLogicEntity, SwitchEntity):
         icon: str,
         item_id: tuple,
         state_key: str,
-    ):
+    ) -> None:
         """Initialize Entities."""
         super().__init__(
             coordinator=coordinator,
@@ -90,16 +83,27 @@ class OmniLogicSwitch(OmniLogicEntity, SwitchEntity):
         )
 
         self._state_key = state_key
+        self._state = None
+        self._last_action = 0
+        self._state_delay = 30
 
     @property
     def is_on(self):
         """Return the on/off state of the switch."""
-        state = int(self.coordinator.data[self._item_id][self._state_key])
+        state_int = 0
 
-        if state == 7:
-            state = 0
+        # The Omnilogic API has a significant delay in state reporting after calling for a
+        # change. This state delay will ensure that HA keeps an optimistic value of state
+        # during this period to improve the user experience and avoid confusion.
+        if self._last_action < (time.time() - self._state_delay):
+            state_int = int(self.coordinator.data[self._item_id][self._state_key])
 
-        return state
+            if self._state == OMNILOGIC_SWITCH_OFF:
+                state_int = 0
+
+        self._state = state_int != 0
+
+        return self._state
 
 
 class OmniLogicRelayControl(OmniLogicSwitch):
@@ -107,29 +111,29 @@ class OmniLogicRelayControl(OmniLogicSwitch):
 
     async def async_turn_on(self, **kwargs):
         """Turn on the relay."""
-        success = await self.coordinator.api.set_relay_valve(
+        self._state = True
+        self._last_action = time.time()
+        self.async_write_ha_state()
+
+        await self.coordinator.api.set_relay_valve(
             int(self._item_id[1]),
             int(self._item_id[3]),
             int(self._item_id[-1]),
             1,
         )
 
-        if success:
-            time.sleep(10)
-            self.async_schedule_update_ha_state()
-
-    async def async_turn_off(self):
+    async def async_turn_off(self, **kwargs):
         """Turn off the relay."""
-        success = await self.coordinator.api.set_relay_valve(
+        self._state = False
+        self._last_action = time.time()
+        self.async_write_ha_state()
+
+        await self.coordinator.api.set_relay_valve(
             int(self._item_id[1]),
             int(self._item_id[3]),
             int(self._item_id[-1]),
             0,
         )
-
-        if success:
-            time.sleep(10)
-            self.async_schedule_update_ha_state()
 
 
 class OmniLogicPumpControl(OmniLogicSwitch):
@@ -143,7 +147,7 @@ class OmniLogicPumpControl(OmniLogicSwitch):
         icon: str,
         item_id: tuple,
         state_key: str,
-    ):
+    ) -> None:
         """Initialize entities."""
         super().__init__(
             coordinator=coordinator,
@@ -154,8 +158,8 @@ class OmniLogicPumpControl(OmniLogicSwitch):
             state_key=state_key,
         )
 
-        self._max_speed = int(coordinator.data[item_id]["Max-Pump-Speed"])
-        self._min_speed = int(coordinator.data[item_id]["Min-Pump-Speed"])
+        self._max_speed = int(coordinator.data[item_id].get("Max-Pump-Speed", 100))
+        self._min_speed = int(coordinator.data[item_id].get("Min-Pump-Speed", 0))
 
         if "Filter-Type" in coordinator.data[item_id]:
             self._pump_type = PUMP_TYPES[coordinator.data[item_id]["Filter-Type"]]
@@ -166,46 +170,46 @@ class OmniLogicPumpControl(OmniLogicSwitch):
 
     async def async_turn_on(self, **kwargs):
         """Turn on the pump."""
+        self._state = True
+        self._last_action = time.time()
+        self.async_write_ha_state()
+
         on_value = 100
 
         if self._pump_type != "SINGLE" and self._last_speed:
             on_value = self._last_speed
 
-        success = await self.coordinator.api.set_relay_valve(
+        await self.coordinator.api.set_relay_valve(
             int(self._item_id[1]),
             int(self._item_id[3]),
             int(self._item_id[-1]),
             on_value,
         )
 
-        if success:
-            time.sleep(10)
-            self.async_schedule_update_ha_state()
-
     async def async_turn_off(self, **kwargs):
         """Turn off the pump."""
+        self._state = False
+        self._last_action = time.time()
+        self.async_write_ha_state()
+
         if self._pump_type != "SINGLE":
             if "filterSpeed" in self.coordinator.data[self._item_id]:
                 self._last_speed = self.coordinator.data[self._item_id]["filterSpeed"]
             else:
                 self._last_speed = self.coordinator.data[self._item_id]["pumpSpeed"]
 
-        success = await self.coordinator.api.set_relay_valve(
+        await self.coordinator.api.set_relay_valve(
             int(self._item_id[1]),
             int(self._item_id[3]),
             int(self._item_id[-1]),
             0,
         )
 
-        if success:
-            time.sleep(10)
-            self.async_schedule_update_ha_state()
-
     async def async_set_speed(self, speed):
         """Set the switch speed."""
 
         if self._pump_type != "SINGLE":
-            if speed >= self._min_speed and speed <= self._max_speed:
+            if self._min_speed <= speed <= self._max_speed:
                 success = await self.coordinator.api.set_relay_valve(
                     int(self._item_id[1]),
                     int(self._item_id[3]),
@@ -214,7 +218,7 @@ class OmniLogicPumpControl(OmniLogicSwitch):
                 )
 
                 if success:
-                    self.async_schedule_update_ha_state()
+                    self.async_write_ha_state()
 
             else:
                 raise OmniLogicException(

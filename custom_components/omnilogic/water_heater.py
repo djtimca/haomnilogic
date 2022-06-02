@@ -9,18 +9,21 @@ from homeassistant.components.water_heater import (
     SUPPORT_TARGET_TEMPERATURE,
     WaterHeaterEntity,
 )
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_TEMPERATURE, TEMP_CELSIUS, TEMP_FAHRENHEIT
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .common import OmniLogicEntity, OmniLogicUpdateCoordinator
+from .common import OmniLogicEntity, OmniLogicUpdateCoordinator, check_guard
 from .const import COORDINATOR, DOMAIN
-
-_LOGGER = logging.getLogger(__name__)
 
 SUPPORT_FLAGS_HEATER = SUPPORT_TARGET_TEMPERATURE | SUPPORT_OPERATION_MODE
 OPERATION_LIST = [STATE_ON, STATE_OFF]
 
 
-async def async_setup_entry(hass, entry, async_add_entities):
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+) -> None:
     """Set up the water heater platform."""
 
     coordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR]
@@ -36,18 +39,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         for entity_setting in entity_settings:
             for state_key, entity_class in entity_setting["entity_classes"].items():
-                if state_key not in item:
-                    continue
-
-                guard = False
-                for guard_condition in entity_setting["guard_condition"]:
-                    if guard_condition and all(
-                        item.get(guard_key) == guard_value
-                        for guard_key, guard_value in guard_condition.items()
-                    ):
-                        guard = True
-
-                if guard:
+                if check_guard(state_key, item, entity_setting):
                     continue
 
                 entity = entity_class(
@@ -195,7 +187,7 @@ class OmniLogicHeaterControl(OmniLogicEntity, WaterHeaterEntity):
 
 
 WATER_HEATER_TYPES = {
-    (6, "Heater"): [
+    (6, "Heaters"): [
         {
             "entity_classes": {"enable": OmniLogicHeaterControl},
             "name": "Heater",

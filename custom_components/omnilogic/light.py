@@ -25,7 +25,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         if not entity_settings:
             continue
-
+        
         for entity_setting in entity_settings:
             for state_key, entity_class in entity_setting["entity_classes"].items():
                 if state_key not in item:
