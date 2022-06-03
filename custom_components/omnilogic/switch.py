@@ -232,7 +232,7 @@ class OmniLogicPumpControl(OmniLogicSwitch):
 SWITCH_TYPES = {
     (4, "Relays"): [
         {
-            "entity_classes": {"switchState": OmniLogicRelayControl},
+            "entity_classes": {"relayState": OmniLogicRelayControl},
             "name": "",
             "kind": "relay",
             "icon": None,
@@ -241,7 +241,7 @@ SWITCH_TYPES = {
     ],
     (6, "Relays"): [
         {
-            "entity_classes": {"switchState": OmniLogicRelayControl},
+            "entity_classes": {"relayState": OmniLogicRelayControl},
             "name": "",
             "kind": "relay",
             "icon": None,
