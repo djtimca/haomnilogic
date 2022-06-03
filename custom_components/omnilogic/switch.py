@@ -74,10 +74,10 @@ class OmniLogicSwitch(OmniLogicEntity, SwitchEntity):
         state_key: str,
     ) -> None:
 
-        switch_type = coordinator.data[item_id].get("Type")
+        switch_type = coordinator.data[item_id].get("Type", "")
 
-        if switch_type:
-            icon = SWITCH_ICONS[switch_type]
+        if switch_type == "RLY_VALVE_ACTUATOR":
+            icon = "mdi:valve"
 
         """Initialize Entities."""
         super().__init__(
@@ -272,8 +272,4 @@ SWITCH_TYPES = {
             "guard_condition": [],
         }
     ],
-}
-
-SWITCH_ICONS = {
-    "RLY_VALVE_ACTUATOR": "mdi:valve"
 }
