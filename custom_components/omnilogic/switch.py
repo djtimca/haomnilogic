@@ -73,6 +73,12 @@ class OmniLogicSwitch(OmniLogicEntity, SwitchEntity):
         item_id: tuple,
         state_key: str,
     ) -> None:
+
+        switch_type = coordinator.data[item_id].get("Type")
+
+        if switch_type:
+            icon = SWITCH_ICONS[switch_type]
+
         """Initialize Entities."""
         super().__init__(
             coordinator=coordinator,
@@ -235,7 +241,7 @@ SWITCH_TYPES = {
             "entity_classes": {"relayState": OmniLogicRelayControl},
             "name": "",
             "kind": "relay",
-            "icon": None,
+            "icon": "mdi:electric-switch",
             "guard_condition": [],
         },
     ],
@@ -244,7 +250,7 @@ SWITCH_TYPES = {
             "entity_classes": {"relayState": OmniLogicRelayControl},
             "name": "",
             "kind": "relay",
-            "icon": None,
+            "icon": "mdi:electric-switch",
             "guard_condition": [],
         }
     ],
@@ -253,7 +259,7 @@ SWITCH_TYPES = {
             "entity_classes": {"pumpState": OmniLogicPumpControl},
             "name": "",
             "kind": "pump",
-            "icon": None,
+            "icon": "mdi:pump",
             "guard_condition": [],
         }
     ],
@@ -262,8 +268,12 @@ SWITCH_TYPES = {
             "entity_classes": {"filterState": OmniLogicPumpControl},
             "name": "",
             "kind": "pump",
-            "icon": None,
+            "icon": "mdi:pump",
             "guard_condition": [],
         }
     ],
+}
+
+SWITCH_ICONS = {
+    "RLY_VALVE_ACTUATOR": "mdi:valve"
 }
