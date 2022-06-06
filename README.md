@@ -28,4 +28,14 @@ Search for Omnilogic and you will see the integration available.
 Click add, confirm you want to install, and enter your username (not email) and password
 for your Hayward Omnilogic App login and everything should be added and available. A restart will be necessary in the process.
 
+### Repository Missing from HACS Integration Search
+If the Omnilogic integration isn't found, you may have to add the repository to HACS using the following steps
+1. Open the HACS page/tab in Home Assistant
+2. Navigate to the **"Integrations"** tab
+3. Click on the three dots in the top right hand and select **"Custom repositories"** from the list of options
+4. Copy and paste this repoistories link `https://github.com/djtimca/haomnilogic` and paste it into the **"Repository"** input field
+5. Select **"Integration"** from the **"Category"** dropdown
+6. Click **"Add"**
+- Allow a few seconds for HACS to pull the latest information and data down. Once available, you'll be able to follow the install instructions above
+
 Enjoy!
