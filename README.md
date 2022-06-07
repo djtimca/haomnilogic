@@ -51,6 +51,10 @@ There is currently support for the following device types within Home Assistant:
 - ***Light*** - Colorlogic Lights (V1 and V2).
 - ***Water Heater*** - Pool heaters of different types.
 
+## Tips for Usage
+
+Review the [Wiki](https://github.com/djtimca/haomnilogic/wiki) for tips on how I have used custom cards and a few helpers/tricks to get the most out of this integration for my pool!
+
 ## Sensor Platform Options
 
 If you have pH sensors in your Omnilogic setup, you can add an offset to correct reporting from the sensor in the integration configuration. 
