@@ -21,9 +21,9 @@ Controls include:
 
 ## Install
 
-Once installed, go to Configuration -> Integrations and click the + to add a new integration.
+Once installed, go to `Configuration -> Integrations` and click the + to add a new integration. On new instances of Home Assistant, `Settings -> Devices & Services -> Integrations` and click the **"+ ADD INTEGRATION"** in the bottom right to add the **Omnilogic** integration.
 
-Search for Omnilogic and you will see the integration available.
+Search for **Omnilogic** and you will see the integration available.
 
 Click add, confirm you want to install, and enter your username (not email) and password
 for your Hayward Omnilogic App login and everything should be added and available. A restart will be necessary in the process.
