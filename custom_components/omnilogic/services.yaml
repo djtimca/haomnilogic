@@ -14,4 +14,16 @@ set_pump_speed:
         number:
           min: 0
           max: 100000
-          
+
+set_v2_lights:
+  description: Set the version 2 light effect speed or brightness
+  fields:
+    entity_id:
+      description: Target light entity
+      example: switch.pool_lights
+    speed:
+      description: Speed for the light effect (0-8) (Optional).
+      example: 4
+    brightness:
+      description: Brightness for the light effect (0-4) (Optional).
+      example: 4
