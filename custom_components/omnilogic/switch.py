@@ -1,7 +1,6 @@
 """Platform for Omnilogic switch integration."""
 import time
 
-from omnilogic import OmniLogicException
 import voluptuous as vol
 
 from homeassistant.components.switch import SwitchEntity
@@ -9,6 +8,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.exceptions import IntegrationError
 
 from .common import OmniLogicEntity, OmniLogicUpdateCoordinator, check_guard
 from .const import COORDINATOR, DOMAIN, PUMP_TYPES
@@ -227,12 +227,12 @@ class OmniLogicPumpControl(OmniLogicSwitch):
                     self.async_write_ha_state()
 
             else:
-                raise OmniLogicException(
+                raise IntegrationError(
                     "Cannot set speed. Speed is outside pump range."
                 )
 
         else:
-            raise OmniLogicException("Cannot set speed on a non-variable speed pump.")
+            raise IntegrationError("Cannot set speed on a non-variable speed pump.")
 
 
 SWITCH_TYPES = {
