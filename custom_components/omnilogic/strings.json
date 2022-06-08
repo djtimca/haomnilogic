@@ -4,18 +4,18 @@
     "step": {
       "user": {
         "data": {
-          "username": "[%key:common::config_flow::data::username%]",
-          "password": "[%key:common::config_flow::data::password%]"
+          "username": "Username (not email)",
+          "password": "Password"
         }
       }
     },
     "error": {
-      "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
-      "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
-      "unknown": "[%key:common::config_flow::error::unknown%]"
+      "cannot_connect": "Can't connect to Hayward Omnilogic. Please try again.",
+      "invalid_auth": "Invalid Hayward credentials. Ensure you are using your username to log in and try again.",
+      "unknown": "Unknown error. Please try again."
     },
     "abort": {
-      "single_instance_allowed": "[%key:common::config_flow::abort::single_instance_allowed%]"
+      "single_instance_allowed": "The Omnilogic integration is already configured. Only one instance is allowed."
     }
   },
   "options": {
