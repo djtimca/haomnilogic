@@ -2,6 +2,7 @@
 
 from datetime import timedelta
 import logging
+import async_timeout
 
 from omnilogic import OmniLogic, OmniLogicException
 
@@ -44,10 +45,14 @@ class OmniLogicUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """Fetch data from OmniLogic."""
         try:
-            data = await self.api.get_telemetry_data()
+            async with async_timeout.timeout(20):
+                data = await self.api.get_telemetry_data()
 
         except OmniLogicException as error:
             raise UpdateFailed(f"Error updating from OmniLogic: {error}") from error
+
+        except TimeoutError as error:
+            raise UpdateFailed(f"Timeout updating OmniLogic from cloud: {error}") from error
 
         parsed_data = {}
 
