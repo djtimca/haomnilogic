@@ -5,6 +5,7 @@ import voluptuous as vol
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv, entity_platform
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -56,7 +57,10 @@ async def async_setup_entry(
 
     platform.async_register_entity_service(
         SERVICE_SET_SPEED,
-        {vol.Required("speed"): cv.positive_int},
+        {
+            vol.Required(ATTR_ENTITY_ID): cv.comp_entity_ids,
+            vol.Required("speed"): cv.positive_int
+        },
         "async_set_speed",
     )
 

@@ -5,7 +5,8 @@ from omnilogic import LightEffect, OmniLogicException
 import voluptuous as vol
 
 from homeassistant.components.light import ATTR_EFFECT, SUPPORT_EFFECT, LightEntity
-from homeassistant.helpers import entity_platform
+from homeassistant.const import ATTR_ENTITY_ID
+from homeassistant.helpers import config_validation as cv, entity_platform
 
 from .common import OmniLogicEntity, OmniLogicUpdateCoordinator
 from .const import COORDINATOR, DOMAIN
@@ -62,6 +63,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     platform.async_register_entity_service(
         SERVICE_SET_V2EFFECT,
         {
+            vol.Required(ATTR_ENTITY_ID): cv.comp_entity_ids,
             vol.Optional("brightness"): vol.All(
                 vol.Coerce(int), vol.Range(min=0, max=4)
             ),
