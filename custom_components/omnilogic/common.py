@@ -8,6 +8,7 @@ from omnilogic import OmniLogic, OmniLogicException
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
@@ -49,10 +50,10 @@ class OmniLogicUpdateCoordinator(DataUpdateCoordinator):
                 data = await self.api.get_telemetry_data()
 
         except OmniLogicException as error:
-            raise UpdateFailed(f"Error updating from OmniLogic: {error}") from error
+            raise ConfigEntryNotReady(f"Error updating from OmniLogic: {error}") from error
 
         except TimeoutError as error:
-            raise UpdateFailed(f"Timeout updating OmniLogic from cloud: {error}") from error
+            raise ConfigEntryNotReady(f"Timeout updating OmniLogic from cloud: {error}") from error
 
         parsed_data = {}
 
