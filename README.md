@@ -98,5 +98,9 @@ If you have problems with the integration, the first thing we will need to troub
 2. Hit the 'Run' button at the top.
 3. Enter your username and password
 4. Hit Enter to clear your credentials
-5. Look for a file called 'output_116_YOURUSERNAME_telemetry.json' in the left side
-6. Post your telemetry when you open an issue in this repository as a code block so we can review and troubleshoot
+5. After the script finishes, your file name will be listed in the output (eg. `output_116_5216g89yd5_telemetry.json`)
+    - Click on the **"Show Files"** on the top left
+    - Look for the respective file and click on it to open and view the content
+        - It may be useful to `CTRL+F` for your file name as the sidebar view cannot be expanded
+    - Copy the telemetry data
+7. Post your telemetry when you open an issue in this repository as a json code block so we can review and troubleshoot
