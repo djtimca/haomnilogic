@@ -147,7 +147,7 @@ class OmniLogicRelayControl(OmniLogicSwitch):
         bow_id = int(self._item_id[3])
         if len(self._item_id) == 4:
             bow_id = 0
-            
+
         await self.coordinator.api.set_relay_valve(
             int(self._item_id[1]),
             bow_id,
