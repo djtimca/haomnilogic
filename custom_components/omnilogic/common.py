@@ -2,9 +2,11 @@
 
 from datetime import timedelta
 import logging
+
+from importlib_metadata import NullFinder
 import async_timeout
 
-from omnilogic import OmniLogic, OmniLogicException
+from omnilogic import OmniLogic, OmniLogicException, LoginException
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -35,6 +37,8 @@ class OmniLogicUpdateCoordinator(DataUpdateCoordinator):
         """Initialize the global Omnilogic data updater."""
         self.api = api
         self.config_entry = config_entry
+        self._last_data = None
+        self._timeout_count = 0
 
         super().__init__(
             hass=hass,
@@ -49,13 +53,24 @@ class OmniLogicUpdateCoordinator(DataUpdateCoordinator):
             async with async_timeout.timeout(20):
                 data = await self.api.get_telemetry_data()
 
+            self._timeout_count = 0
+
         except OmniLogicException as error:
-            raise ConfigEntryNotReady(f"Error updating from OmniLogic: {error}") from error
+            raise UpdateFailed(f"Error updating from OmniLogic: {error}") from error
+
+        except LoginException as error:
+            raise UpdateFailed(f"Login failed for Omnilogic: {error}") from error
 
         except TimeoutError as error:
-            raise ConfigEntryNotReady(f"Timeout updating OmniLogic from cloud: {error}") from error
+            self._timeout_count += 1
+
+            if self._timeout_count > 10 or not self._last_data:
+                raise UpdateFailed(f"Timeout updating OmniLogic from cloud: {error}") from error
+            else:
+                data = self._last_data
 
         parsed_data = {}
+        self._last_data = data
 
         def get_item_data(item, item_kind, current_id, data):
             """Get data per kind of Omnilogic API item."""
