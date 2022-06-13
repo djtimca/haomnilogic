@@ -50,7 +50,7 @@ class OmniLogicUpdateCoordinator(DataUpdateCoordinator):
     async def _async_update_data(self):
         """Fetch data from OmniLogic."""
         try:
-            async with async_timeout.timeout(20):
+            async with async_timeout.timeout(30):
                 data = await self.api.get_telemetry_data()
 
             self._timeout_count = 0
