@@ -3,7 +3,7 @@
   "name": "Hayward Omnilogic",
   "config_flow": true,
   "version": "1.0",
-  "documentation": "https://www.home-assistant.io/integrations/omnilogic",
+  "documentation": "https://github.com/djtimca/haomnilogic",
   "requirements": ["omnilogic==0.4.8"],
   "codeowners": ["@oliver84","@djtimca","@gentoosu"],
   "issue_tracker": "https://github.com/djtimca/haomnilogic/issues", 
