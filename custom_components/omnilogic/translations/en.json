@@ -1,0 +1,31 @@
+{
+  "title": "Omnilogic",
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "username": "Username (not email)",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Can't connect to Hayward Omnilogic. Please try again.",
+      "invalid_auth": "Invalid Hayward credentials. Ensure you are using your username to log in and try again.",
+      "unknown": "Unknown error. Please try again."
+    },
+    "abort": {
+      "single_instance_allowed": "The Omnilogic integration is already configured. Only one instance is allowed."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "polling_interval": "Polling interval (in seconds)",
+          "ph_offset": "pH offset (positive or negative)"
+        }
+      }
+    }
+  }
+}
