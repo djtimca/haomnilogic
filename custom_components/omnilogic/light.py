@@ -96,7 +96,7 @@ class OmniLogicLightControl(OmniLogicEntity, LightEntity):
 
         self._state_key = state_key
         self._wait_for_state_change = False
-        if coordinator.data[item_id]["V2"] == "yes":
+        if coordinator.data[item_id].get("V2") == "yes" or coordinator.data[item_id].get("speed"):
             self._version = 2
             self._brightness = 4
             self._speed = 4
@@ -113,10 +113,10 @@ class OmniLogicLightControl(OmniLogicEntity, LightEntity):
         """Return if the light is on."""
         if self._last_action < (time.time() - self._state_delay):
             if self._version == 2:
-                self._attrs["brightness"] = self.coordinator.data[self._item_id][
+                self._attrs["brightness"] = self.coordinator.data[self._item_id].get(
                     "brightness"
-                ]
-                self._attrs["speed"] = self.coordinator.data[self._item_id]["speed"]
+                )
+                self._attrs["speed"] = self.coordinator.data[self._item_id].get("speed")
 
             self._state = int(self.coordinator.data[self._item_id][self._state_key])
 
