@@ -112,7 +112,7 @@ class OmniLogicTemperatureSensor(OmnilogicSensor):
             hayward_state = round((int(hayward_state) - 32) * 5 / 9, 1)
             hayward_unit_of_measure = TEMP_CELSIUS
 
-        if int(sensor_data) == -1:
+        if int(sensor_data) == -1 or int(sensor_data) == 255:
             hayward_state = None
             state = None
 
