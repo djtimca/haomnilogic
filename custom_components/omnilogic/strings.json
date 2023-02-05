@@ -4,7 +4,7 @@
     "step": {
       "user": {
         "data": {
-          "username": "Username (not email)",
+          "username": "Username",
           "password": "Password"
         }
       }

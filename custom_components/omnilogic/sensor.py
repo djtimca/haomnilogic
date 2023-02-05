@@ -319,8 +319,22 @@ SENSOR_TYPES = {
         },
         {
             "entity_classes": {"avgSaltLevel": OmniLogicSaltLevelSensor},
-            "name": "Salt Level",
-            "kind": "salt_level",
+            "name": "Average Salt Level",
+            "kind": "average_salt_level",
+            "device_class": None,
+            "icon": "mdi:gauge",
+            "unit": CONCENTRATION_PARTS_PER_MILLION,
+            "guard_condition": [
+                {
+                    "Shared-Type": "BOW_SHARED_EQUIPMENT",
+                    "status": "0",
+                },
+            ],
+        },
+        {
+            "entity_classes": {"instantSaltLevel": OmniLogicSaltLevelSensor},
+            "name": "Instant Salt Level",
+            "kind": "instant_salt_level",
             "device_class": None,
             "icon": "mdi:gauge",
             "unit": CONCENTRATION_PARTS_PER_MILLION,

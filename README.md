@@ -46,7 +46,7 @@ Enjoy!
 
 There is currently support for the following device types within Home Assistant:
 
-- ***Sensor*** - Air Temperature, Water Temperature, Variable Pump Speed, Chlorinator Setting, Salt Level, pH, and ORP
+- ***Sensor*** - Air Temperature, Water Temperature, Variable Pump Speed, Chlorinator Setting, Instant and Average Salt Levels, pH, and ORP. Note that the Omnilogic controller allows temperature sensors to be renamed; sensors must be left at the default naming convention for the integration to properly recognize them (airTemp, waterTemp, etc.)
 - ***Switch*** - All relays, pumps (single, dual, variable speed), and relay-based lights.
 - ***Light*** - Colorlogic Lights (V1 and V2).
 - ***Water Heater*** - Pool heaters of different types.
@@ -57,7 +57,7 @@ Review the [Wiki](https://github.com/djtimca/haomnilogic/wiki) for tips on how I
 
 ## Sensor Platform Options
 
-If you have pH sensors in your Omnilogic setup, you can add an offset to correct reporting from the sensor in the integration configuration. 
+If you have pH sensors in your Omnilogic setup, you can add an offset to correct reporting from the sensor in the integration configuration.
 
 Go to the Integrations page in setup and choose 'Configure' to adjust your offsets.
 
