@@ -1,5 +1,9 @@
 """Definition and setup of the Omnilogic Sensors for Home Assistant."""
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    STATE_CLASS_MEASUREMENT,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     CONCENTRATION_PARTS_PER_MILLION,
@@ -45,6 +49,7 @@ async def async_setup_entry(
                     kind=entity_setting["kind"],
                     item_id=item_id,
                     device_class=entity_setting["device_class"],
+                    state_class=entity_setting["state_class"],
                     icon=entity_setting["icon"],
                     unit=entity_setting["unit"],
                 )
@@ -63,6 +68,7 @@ class OmnilogicSensor(OmniLogicEntity, SensorEntity):
         kind: str,
         name: str,
         device_class: str,
+        state_class: str,
         icon: str,
         unit: str,
         item_id: tuple,
@@ -82,6 +88,7 @@ class OmnilogicSensor(OmniLogicEntity, SensorEntity):
 
         self._unit_type = unit_type
         self._device_class = device_class
+        self._state_class = state_class
         self._unit = unit
         self._state_key = state_key
 
@@ -89,6 +96,11 @@ class OmnilogicSensor(OmniLogicEntity, SensorEntity):
     def device_class(self):
         """Return the device class of the entity."""
         return self._device_class
+
+    @property
+    def state_class(self):
+        """Return the state class of the entity."""
+        return self._state_class
 
     @property
     def native_unit_of_measurement(self):
@@ -221,6 +233,7 @@ class OmniLogicORPSensor(OmnilogicSensor):
         kind: str,
         item_id: tuple,
         device_class: str,
+        state_class: str,
         icon: str,
         unit: str,
     ) -> None:
@@ -230,6 +243,7 @@ class OmniLogicORPSensor(OmnilogicSensor):
             kind=kind,
             name=name,
             device_class=device_class,
+            state_class=state_class,
             icon=icon,
             unit=unit,
             item_id=item_id,
@@ -255,6 +269,7 @@ SENSOR_TYPES = {
             "name": "Air Temperature",
             "kind": "air_temperature",
             "device_class": SensorDeviceClass.TEMPERATURE,
+            "state_class": STATE_CLASS_MEASUREMENT,
             "icon": None,
             "unit": TEMP_FAHRENHEIT,
             "native_unit_of_measurement": TEMP_FAHRENHEIT,
@@ -267,6 +282,7 @@ SENSOR_TYPES = {
             "name": "Water Temperature",
             "kind": "water_temperature",
             "device_class": SensorDeviceClass.TEMPERATURE,
+            "state_class": STATE_CLASS_MEASUREMENT,
             "icon": None,
             "unit": TEMP_FAHRENHEIT,
             "native_unit_of_measurement": TEMP_FAHRENHEIT,
@@ -279,6 +295,7 @@ SENSOR_TYPES = {
             "name": "Speed",
             "kind": "filter_pump_speed",
             "device_class": None,
+            "state_class": None,
             "icon": "mdi:speedometer",
             "unit": PERCENTAGE,
             "guard_condition": [
@@ -292,6 +309,7 @@ SENSOR_TYPES = {
             "name": "Pump Speed",
             "kind": "pump_speed",
             "device_class": None,
+            "state_class": None,
             "icon": "mdi:speedometer",
             "unit": PERCENTAGE,
             "guard_condition": [
@@ -305,6 +323,7 @@ SENSOR_TYPES = {
             "name": "Setting",
             "kind": "chlorinator",
             "device_class": None,
+            "state_class": None,
             "icon": "mdi:gauge",
             "unit": PERCENTAGE,
             "guard_condition": [
@@ -322,6 +341,7 @@ SENSOR_TYPES = {
             "name": "Average Salt Level",
             "kind": "average_salt_level",
             "device_class": None,
+            "state_class": STATE_CLASS_MEASUREMENT,
             "icon": "mdi:gauge",
             "unit": CONCENTRATION_PARTS_PER_MILLION,
             "guard_condition": [
@@ -336,6 +356,7 @@ SENSOR_TYPES = {
             "name": "Instant Salt Level",
             "kind": "instant_salt_level",
             "device_class": None,
+            "state_class": STATE_CLASS_MEASUREMENT,
             "icon": "mdi:gauge",
             "unit": CONCENTRATION_PARTS_PER_MILLION,
             "guard_condition": [
@@ -352,6 +373,7 @@ SENSOR_TYPES = {
             "name": "pH",
             "kind": "csad_ph",
             "device_class": None,
+            "state_class": STATE_CLASS_MEASUREMENT,
             "icon": "mdi:gauge",
             "unit": "pH",
             "guard_condition": [
@@ -363,6 +385,7 @@ SENSOR_TYPES = {
             "name": "ORP",
             "kind": "csad_orp",
             "device_class": None,
+            "state_class": STATE_CLASS_MEASUREMENT,
             "icon": "mdi:gauge",
             "unit": ELECTRIC_POTENTIAL_MILLIVOLT,
             "guard_condition": [
