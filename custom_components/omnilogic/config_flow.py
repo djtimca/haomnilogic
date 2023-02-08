@@ -74,30 +74,48 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry):
         """Initialize options flow."""
         self.config_entry = config_entry
+        self.data_schema = vol.Schema(
+            {
+                vol.Required(
+                    CONF_USERNAME,
+                    default=self.config_entry.data[CONF_USERNAME],
+                ): str,
+                vol.Required(
+                    CONF_PASSWORD,
+                    default=self.config_entry.data[CONF_PASSWORD],
+                ): str,
+                vol.Optional(
+                    CONF_SCAN_INTERVAL,
+                    default=self.config_entry.options.get(
+                        CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+                    ),
+                ): int,
+                vol.Optional(
+                    "ph_offset",
+                    default=self.config_entry.options.get(
+                        "ph_offset", DEFAULT_PH_OFFSET
+                    ),
+                ): vol.All(vol.Coerce(float), vol.Range(min=-14.0, max=14.0)),
+            }
+        )
 
     async def async_step_init(self, user_input=None):
         """Manage options."""
+        # Data stores Omnilogic credentials. Options stores runtime options (pH offset and scan rate).
+        # Allow changing credentials after installation and maintain compatibility with older integration versions
+        # by writing all settings to both Data and Options config entries.
 
         if user_input is not None:
+
+            # write updated config entries
+            self.hass.config_entries.async_update_entry(
+                self.config_entry, data=user_input, options=self.config_entry.options
+            )
+            # reload updated config entries
+            await self.hass.config_entries.async_reload(self.config_entry.entry_id)
+            self.async_abort(reason="configuration updated")
+
+            # write options entries
             return self.async_create_entry(title="", data=user_input)
 
-        return self.async_show_form(
-            step_id="init",
-            data_schema=vol.Schema(
-                {
-                    vol.Optional(
-                        CONF_SCAN_INTERVAL,
-                        default=self.config_entry.options.get(
-                            CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
-                        ),
-                    ): int,
-                    vol.Optional(
-                        "ph_offset",
-                        default=self.config_entry.options.get(
-                            "ph_offset", DEFAULT_PH_OFFSET
-                        ),
-                    ): vol.All(vol.Coerce(float)),
-                }
-            ),
-        )
-        
+        return self.async_show_form(step_id="init", data_schema=self.data_schema)

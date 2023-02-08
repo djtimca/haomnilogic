@@ -22,8 +22,10 @@
     "step": {
       "init": {
         "data": {
-          "polling_interval": "Polling interval (in seconds)",
-          "ph_offset": "pH offset (positive or negative)"
+          "username": "Username",
+          "password": "Password",
+          "polling_interval": "Polling interval (seconds, default=30)",
+          "ph_offset": "pH offset (+14 to -14)"
         }
       }
     }
