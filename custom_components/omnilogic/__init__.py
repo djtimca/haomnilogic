@@ -18,7 +18,13 @@ from .const import (
     OMNI_API,
 )
 
-PLATFORMS = [Platform.SENSOR, Platform.SWITCH, Platform.LIGHT, Platform.WATER_HEATER, Platform.BINARY_SENSOR]
+PLATFORMS = [
+    Platform.SENSOR,
+    Platform.SWITCH,
+    Platform.LIGHT,
+    Platform.WATER_HEATER,
+    Platform.BINARY_SENSOR,
+]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -59,7 +65,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         OMNI_API: api,
     }
 
-    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
 
