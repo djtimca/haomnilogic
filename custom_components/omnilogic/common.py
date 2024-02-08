@@ -3,7 +3,6 @@
 from datetime import timedelta
 import logging
 
-from importlib_metadata import NullFinder
 import async_timeout
 
 from omnilogic import OmniLogic, OmniLogicException, LoginException
