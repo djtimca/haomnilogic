@@ -5,8 +5,7 @@ import logging
 from homeassistant.components.water_heater import (
     STATE_OFF,
     STATE_ON,
-    SUPPORT_OPERATION_MODE,
-    SUPPORT_TARGET_TEMPERATURE,
+    WaterHeaterEntityFeature,
     WaterHeaterEntity,
 )
 from homeassistant.config_entries import ConfigEntry
@@ -17,7 +16,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .common import OmniLogicEntity, OmniLogicUpdateCoordinator, check_guard
 from .const import COORDINATOR, DOMAIN
 
-SUPPORT_FLAGS_HEATER = SUPPORT_TARGET_TEMPERATURE | SUPPORT_OPERATION_MODE
+SUPPORT_FLAGS_HEATER = WaterHeaterEntityFeature.TARGET_TEMPERATURE | WaterHeaterEntityFeature.OPERATION_MODE
 OPERATION_LIST = [STATE_ON, STATE_OFF]
 
 
