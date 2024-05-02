@@ -9,7 +9,7 @@ from homeassistant.components.water_heater import (
     WaterHeaterEntity,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_TEMPERATURE, TEMP_CELSIUS, TEMP_FAHRENHEIT
+from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -84,7 +84,7 @@ class OmniLogicHeaterControl(OmniLogicEntity, WaterHeaterEntity):
     @property
     def temperature_unit(self):
         """Return the unit of measure for the target temp."""
-        return TEMP_FAHRENHEIT
+        return UnitOfTemperature.FAHRENHEIT
 
     @property
     def target_temperature(self):
@@ -140,10 +140,10 @@ class OmniLogicHeaterControl(OmniLogicEntity, WaterHeaterEntity):
         temperature = float(self.coordinator.data[bow_id]["waterTemp"])
         if self.coordinator.data[backyard_id]["Unit-of-Measurement"] == "Metric":
             hayward_temperature = round((temperature - 32) * 5 / 9, 1)
-            hayward_unit_of_measure = TEMP_CELSIUS
+            hayward_unit_of_measure = UnitOfTemperature.CELSIUS
         else:
             hayward_temperature = temperature
-            hayward_unit_of_measure = TEMP_FAHRENHEIT
+            hayward_unit_of_measure = UnitOfTemperature.FAHRENHEIT
 
         self._attrs["hayward_temperature"] = hayward_temperature
         self._attrs["hayward_unit_of_measure"] = hayward_unit_of_measure
