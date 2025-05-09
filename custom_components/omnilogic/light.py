@@ -4,7 +4,8 @@ import time
 from omnilogic import LightEffect, OmniLogicException
 import voluptuous as vol
 
-from homeassistant.components.light import ATTR_EFFECT, SUPPORT_EFFECT, LightEntity
+from homeassistant.components.light import ATTR_EFFECT, LightEntity
+from homeassistant.components.light import LightEntityFeature
 from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.helpers import config_validation as cv, entity_platform
 
@@ -145,7 +146,7 @@ class OmniLogicLightControl(OmniLogicEntity, LightEntity):
     @property
     def supported_features(self):
         """Return the list of supported features of the light."""
-        return SUPPORT_EFFECT
+        return LightEntityFeature.EFFECT
 
     async def async_set_effect(self, effect):
         """Set the light show effect."""
