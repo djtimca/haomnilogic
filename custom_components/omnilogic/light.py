@@ -4,7 +4,7 @@ import time
 from omnilogic import LightEffect, OmniLogicException
 import voluptuous as vol
 
-from homeassistant.components.light import ATTR_EFFECT, LightEntity
+from homeassistant.components.light import ATTR_EFFECT, LightEntity, ColorMode
 from homeassistant.components.light import LightEntityFeature
 from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.helpers import config_validation as cv, entity_platform
@@ -108,6 +108,7 @@ class OmniLogicLightControl(OmniLogicEntity, LightEntity):
         self._state = None
         self._state_delay = 60
         self._effect = None
+        self._attr_supported_color_modes = {ColorMode.ONOFF}
 
     @property
     def is_on(self):
@@ -147,6 +148,11 @@ class OmniLogicLightControl(OmniLogicEntity, LightEntity):
     def supported_features(self):
         """Return the list of supported features of the light."""
         return LightEntityFeature.EFFECT
+        
+    @property
+    def color_mode(self):
+        """Return the color mode of the light."""
+        return ColorMode.ONOFF
 
     async def async_set_effect(self, effect):
         """Set the light show effect."""
