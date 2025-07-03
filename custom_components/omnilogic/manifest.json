@@ -2,9 +2,9 @@
   "domain": "omnilogic",
   "name": "Hayward Omnilogic",
   "config_flow": true,
-  "version": "1.0",
+  "version": "1.1",
   "documentation": "https://github.com/djtimca/haomnilogic",
-  "requirements": ["omnilogic==0.5.0"],
+  "requirements": ["omnilogic==0.5.1"],
   "codeowners": ["@oliver84","@djtimca","@gentoosu"],
   "issue_tracker": "https://github.com/djtimca/haomnilogic/issues", 
   "iot_class": "cloud_polling"
