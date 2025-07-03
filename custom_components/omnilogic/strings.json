@@ -4,14 +4,14 @@
     "step": {
       "user": {
         "data": {
-          "username": "Username",
+          "username": "Email Address",
           "password": "Password"
         }
       }
     },
     "error": {
       "cannot_connect": "Can't connect to Hayward Omnilogic. Please try again.",
-      "invalid_auth": "Invalid Hayward credentials. Ensure you are using your username to log in and try again.",
+      "invalid_auth": "Invalid Hayward credentials. Ensure you are using your email address to log in and try again.",
       "unknown": "Unknown error. Please try again."
     },
     "abort": {
@@ -22,7 +22,7 @@
     "step": {
       "init": {
         "data": {
-          "username": "Username",
+          "username": "Email Address",
           "password": "Password",
           "polling_interval": "Polling interval (seconds, default=30)",
           "ph_offset": "pH offset (+14 to -14)"
