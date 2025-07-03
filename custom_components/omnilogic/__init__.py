@@ -1,6 +1,8 @@
 """The Omnilogic integration."""
 import logging
 
+_LOGGER = logging.getLogger(__name__)
+
 from omnilogic import LoginException, OmniLogic, OmniLogicException
 
 from homeassistant.config_entries import ConfigEntry
