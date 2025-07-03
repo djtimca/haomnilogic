@@ -2,6 +2,7 @@
 import logging
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.DEBUG)
 
 from omnilogic import LoginException, OmniLogic, OmniLogicException
 
@@ -47,9 +48,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await api.get_telemetry_data()
     except LoginException as error:
         _LOGGER.error("Login Failed: %s", error)
+        _LOGGER.error("Authentication failed with email: %s. Check your credentials and ensure you're using the correct email address.", username)
         return False
     except OmniLogicException as error:
-        _LOGGER.debug("OmniLogic API error: %s", error)
+        _LOGGER.error("OmniLogic API error: %s", error)
+        _LOGGER.debug("API error details: Connection attempt with email: %s", username)
         raise ConfigEntryNotReady from error
 
     coordinator = OmniLogicUpdateCoordinator(
