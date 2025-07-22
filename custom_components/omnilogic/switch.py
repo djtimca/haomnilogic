@@ -249,6 +249,116 @@ class OmniLogicPumpControl(OmniLogicSwitch):
             raise IntegrationError("Cannot set speed on a non-variable speed pump.")
 
 
+class OmniLogicChlorinatorSwitch(OmniLogicEntity, SwitchEntity):
+    """Define an OmniLogic Chlorinator Switch."""
+
+    def __init__(self, coordinator, state_key, name, kind, item_id, icon):
+        """Initialize the chlorinator switch."""
+        super().__init__(coordinator, kind, name, item_id, icon)
+        self._state_key = state_key
+        self._equipment_id = self.coordinator.data[self._item_id]["systemId"]
+
+    @property
+    def is_on(self):
+        """Return true if the chlorinator is on."""
+        return self.coordinator.data[self._item_id]["operatingMode"] != "0"
+
+
+
+    async def async_turn_on(self):
+        """Turn the chlorinator on."""
+        success = await self.coordinator.api.set_equipment(
+            int(self._item_id[3]),  # PoolID
+            int(self._equipment_id),  # EquipmentID
+            1  # IsOn
+        )
+        
+        if success:
+            self.async_schedule_update_ha_state()
+
+    async def async_turn_off(self):
+        """Turn the chlorinator off."""
+        # First turn off superchlorinate if it's on
+        superchlorinate_data = self.coordinator.data[self._item_id]
+        if superchlorinate_data.get("scMode", "0") != "0":
+            await self.coordinator.api.set_superchlorination(
+                int(self._item_id[1]),  # MspSystemID
+                int(self._item_id[3]),  # PoolID
+                int(self._equipment_id),  # ChlorID
+                0  # IsOn (off)
+            )
+        
+        # Then turn off the chlorinator
+        success = await self.coordinator.api.set_equipment(
+            int(self._item_id[3]),  # PoolID
+            int(self._equipment_id),  # EquipmentID
+            0  # IsOn
+        )
+        
+        if success:
+            self.async_schedule_update_ha_state()
+
+
+class OmniLogicSuperchlorinateSwitch(OmniLogicEntity, SwitchEntity):
+    """Define an OmniLogic Superchlorinate Switch."""
+
+    def __init__(self, coordinator, state_key, name, kind, item_id, icon):
+        """Initialize the superchlorinate switch."""
+        super().__init__(coordinator, kind, name, item_id, icon)
+        self._state_key = state_key
+        self._equipment_id = self.coordinator.data[self._item_id]["systemId"]
+
+    @property
+    def is_on(self):
+        """Return true if superchlorination is on."""
+        return self.coordinator.data[self._item_id]["scMode"] != "0"
+
+    @property
+    def available(self):
+        """Return if the superchlorinate switch is available."""
+        # Only available if parent chlorinator is on
+        return (
+            super().available and 
+            self.coordinator.data[self._item_id]["operatingMode"] != "0"
+        )
+
+
+
+    async def async_turn_on(self):
+        """Turn superchlorination on."""
+        # Ensure parent chlorinator is on first
+        if self.coordinator.data[self._item_id]["operatingMode"] == "0":
+            # Turn on chlorinator first
+            await self.coordinator.api.set_equipment(
+                int(self._item_id[3]),  # PoolID
+                int(self._equipment_id),  # EquipmentID
+                1  # IsOn
+            )
+        
+        # Then enable superchlorination
+        success = await self.coordinator.api.set_superchlorination(
+            int(self._item_id[1]),  # MspSystemID
+            int(self._item_id[3]),  # PoolID
+            int(self._equipment_id),  # ChlorID
+            1  # IsOn
+        )
+        
+        if success:
+            self.async_schedule_update_ha_state()
+
+    async def async_turn_off(self):
+        """Turn superchlorination off."""
+        success = await self.coordinator.api.set_superchlorination(
+            int(self._item_id[1]),  # MspSystemID
+            int(self._item_id[3]),  # PoolID
+            int(self._equipment_id),  # ChlorID
+            0  # IsOn
+        )
+        
+        if success:
+            self.async_schedule_update_ha_state()
+
+
 SWITCH_TYPES = {
     (4, "Relays"): [
         {
@@ -285,5 +395,21 @@ SWITCH_TYPES = {
             "icon": "mdi:pump",
             "guard_condition": [],
         }
+    ],
+    (6, "Chlorinator"): [
+        {
+            "entity_classes": {"operatingMode": OmniLogicChlorinatorSwitch},
+            "name": "",
+            "kind": "chlorinator",
+            "icon": "mdi:pool",
+            "guard_condition": [],
+        },
+        {
+            "entity_classes": {"scMode": OmniLogicSuperchlorinateSwitch},
+            "name": "Superchlorinate",
+            "kind": "superchlorinate",
+            "icon": "mdi:pool-thermometer",
+            "guard_condition": [],
+        },
     ],
 }
