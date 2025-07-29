@@ -64,7 +64,6 @@ async def async_setup_entry(hass, entry, async_add_entities):
     platform.async_register_entity_service(
         SERVICE_SET_V2EFFECT,
         {
-            vol.Required(ATTR_ENTITY_ID): cv.comp_entity_ids,
             vol.Optional("brightness"): vol.All(
                 vol.Coerce(int), vol.Range(min=0, max=4)
             ),

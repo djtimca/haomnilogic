@@ -15,6 +15,7 @@ from .common import OmniLogicEntity, OmniLogicUpdateCoordinator, check_guard
 from .const import COORDINATOR, DOMAIN, PUMP_TYPES
 
 SERVICE_SET_SPEED = "set_pump_speed"
+SERVICE_SET_CHLOR_TIMED_PERCENT = "set_chlor_timed_percent"
 OMNILOGIC_SWITCH_OFF = 7
 
 
@@ -58,10 +59,17 @@ async def async_setup_entry(
     platform.async_register_entity_service(
         SERVICE_SET_SPEED,
         {
-            vol.Required(ATTR_ENTITY_ID): cv.comp_entity_ids,
             vol.Required("speed"): cv.positive_int
         },
         "async_set_speed",
+    )
+
+    platform.async_register_entity_service(
+        SERVICE_SET_CHLOR_TIMED_PERCENT,
+        {
+            vol.Required("timed_percent"): vol.All(cv.positive_int, vol.Range(min=0, max=100))
+        },
+        "async_set_chlor_timed_percent",
     )
 
 
@@ -249,69 +257,60 @@ class OmniLogicPumpControl(OmniLogicSwitch):
             raise IntegrationError("Cannot set speed on a non-variable speed pump.")
 
 
-class OmniLogicChlorinatorSwitch(OmniLogicEntity, SwitchEntity):
+class OmniLogicChlorinatorSwitch(OmniLogicSwitch):
     """Define an OmniLogic Chlorinator Switch."""
 
     def __init__(self, coordinator, state_key, name, kind, item_id, icon):
         """Initialize the chlorinator switch."""
-        super().__init__(coordinator, kind, name, item_id, icon)
-        self._state_key = state_key
+        super().__init__(coordinator, kind, name, icon, item_id, state_key)
         self._equipment_id = self.coordinator.data[self._item_id]["systemId"]
-
-    @property
-    def is_on(self):
-        """Return true if the chlorinator is on."""
-        return self.coordinator.data[self._item_id]["operatingMode"] != "0"
 
 
 
     async def async_turn_on(self):
         """Turn the chlorinator on."""
-        success = await self.coordinator.api.set_equipment(
+        success, _ = await self.coordinator.api.set_chlor_params(
             int(self._item_id[3]),  # PoolID
-            int(self._equipment_id),  # EquipmentID
-            1  # IsOn
+            int(self._equipment_id),  # ChlorID (from Operation System-Id)
+            3  # cfgState: Enable/On
         )
         
         if success:
-            self.async_schedule_update_ha_state()
+            await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self):
         """Turn the chlorinator off."""
-        # First turn off superchlorinate if it's on
-        superchlorinate_data = self.coordinator.data[self._item_id]
-        if superchlorinate_data.get("scMode", "0") != "0":
-            await self.coordinator.api.set_superchlorination(
-                int(self._item_id[1]),  # MspSystemID
-                int(self._item_id[3]),  # PoolID
-                int(self._equipment_id),  # ChlorID
-                0  # IsOn (off)
-            )
-        
-        # Then turn off the chlorinator
-        success = await self.coordinator.api.set_equipment(
+        success, _ = await self.coordinator.api.set_chlor_params(
             int(self._item_id[3]),  # PoolID
-            int(self._equipment_id),  # EquipmentID
-            0  # IsOn
+            int(self._equipment_id),  # ChlorID (from Operation System-Id)
+            2  # cfgState: Disable/Off
         )
         
         if success:
-            self.async_schedule_update_ha_state()
+            await self.coordinator.async_request_refresh()
+
+    async def async_set_chlor_timed_percent(self, timed_percent):
+        """Set the chlorinator timed percentage."""
+        success, _ = await self.coordinator.api.set_chlor_params(
+            int(self._item_id[3]),  # PoolID
+            int(self._equipment_id),  # ChlorID (from Operation System-Id)
+            None,  # cfgState (not changing state)
+            None,  # opMode (not changing)
+            None,  # bowType (not changing)
+            int(timed_percent)  # timedPercent
+        )
+        
+        if success:
+            await self.coordinator.async_request_refresh()
 
 
-class OmniLogicSuperchlorinateSwitch(OmniLogicEntity, SwitchEntity):
+class OmniLogicSuperchlorinateSwitch(OmniLogicSwitch):
     """Define an OmniLogic Superchlorinate Switch."""
 
     def __init__(self, coordinator, state_key, name, kind, item_id, icon):
         """Initialize the superchlorinate switch."""
-        super().__init__(coordinator, kind, name, item_id, icon)
-        self._state_key = state_key
-        self._equipment_id = self.coordinator.data[self._item_id]["systemId"]
-
-    @property
-    def is_on(self):
-        """Return true if superchlorination is on."""
-        return self.coordinator.data[self._item_id]["scMode"] != "0"
+        super().__init__(coordinator, kind, name, icon, item_id, state_key)
+        self._equipment_id = self.coordinator.data[self._item_id]["Operation"][0]["System-Id"]
 
     @property
     def available(self):
@@ -398,7 +397,7 @@ SWITCH_TYPES = {
     ],
     (6, "Chlorinator"): [
         {
-            "entity_classes": {"operatingMode": OmniLogicChlorinatorSwitch},
+            "entity_classes": {"enable": OmniLogicChlorinatorSwitch},
             "name": "",
             "kind": "chlorinator",
             "icon": "mdi:pool",

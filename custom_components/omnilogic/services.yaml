@@ -6,10 +6,6 @@ set_pump_speed:
       integration: omnilogic
       domain: switch
   fields:
-    entity_id:
-      name: Entity ID
-      description: Target pump entity.
-      required: true
     speed:
       name: Speed
       description: Speed for the VSP between min and max speed.
@@ -20,14 +16,43 @@ set_pump_speed:
           max: 100000
 
 set_v2_lights:
+  name: Set V2 light effects
   description: Set the version 2 light effect speed or brightness
+  target:
+    entity:
+      integration: omnilogic
+      domain: light
   fields:
-    entity_id:
-      description: Target light entity
-      example: switch.pool_lights
     speed:
+      name: Speed
       description: Speed for the light effect (0-8) (Optional).
-      example: 4
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 8
     brightness:
+      name: Brightness
       description: Brightness for the light effect (0-4) (Optional).
-      example: 4
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 4
+
+set_chlor_timed_percent:
+  name: Set chlorinator timed percent
+  description: Set the timed percentage for a chlorinator.
+  target:
+    entity:
+      integration: omnilogic
+      domain: switch
+  fields:
+    timed_percent:
+      name: Timed Percent
+      description: Timed percentage for the chlorinator between 0 and 100.
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 100

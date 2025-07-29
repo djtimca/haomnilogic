@@ -25,7 +25,7 @@ Once installed, go to `Configuration -> Integrations` and click the + to add a n
 
 Search for **Omnilogic** and you will see the integration available.
 
-Click add, confirm you want to install, and enter your username (not email) and password
+Click add, confirm you want to install, and enter your email address and password
 for your Hayward Omnilogic App login and everything should be added and available. A restart will be necessary in the process.
 
 ### Repository Missing from HACS Integration Search
@@ -47,7 +47,7 @@ Enjoy!
 There is currently support for the following device types within Home Assistant:
 
 - ***Sensor*** - Air Temperature, Water Temperature, Variable Pump Speed, Chlorinator Setting, Instant and Average Salt Levels, pH, and ORP. Note that the Omnilogic controller allows temperature sensors to be renamed; sensors must be left at the default naming convention for the integration to properly recognize them (airTemp, waterTemp, etc.)
-- ***Switch*** - All relays, pumps (single, dual, variable speed), and relay-based lights.
+- ***Switch*** - All relays, pumps (single, dual, variable speed), relay-based lights, chlorinator control, and superchlorination control.
 - ***Light*** - Colorlogic Lights (V1 and V2).
 - ***Water Heater*** - Pool heaters of different types.
 
@@ -63,32 +63,76 @@ Go to the Integrations page in setup and choose 'Configure' to adjust your offse
 
 ## Switch Platform
 
-The switch platform contains a custom service to allow you to set the speed on variable speed pumps.
+The switch platform contains custom services for pump speed control and chlorinator management.
 
-To set pump speed, call the `omnilogic.set_pump_speed` service as following:
+### Pump Speed Control
+
+To set pump speed on variable speed pumps, call the `omnilogic.set_pump_speed` service:
 
 ```yaml
+# Modern format (recommended)
+service: omnilogic.set_pump_speed
+target:
+  entity_id: switch.pool_pump
+data:
+  speed: 75
+
+# Legacy format (still supported)
 service: omnilogic.set_pump_speed
 data:
-  entity_id: Entity ID of the Pump
-  speed: Speed (0-100%)
+  entity_id: switch.pool_pump
+  speed: 75
 ```
 
-Note the custom service is only available for variable speed pumps.
+### Chlorinator Control
+
+The integration provides full chlorinator control with two switch entities:
+- **Chlorinator Switch**: Controls the main chlorinator on/off state
+- **Superchlorinate Switch**: Controls superchlorination mode (only available when chlorinator is on)
+
+To set the chlorinator timed output percentage, use the `omnilogic.set_chlor_timed_percent` service:
+
+```yaml
+# Modern format (recommended)
+service: omnilogic.set_chlor_timed_percent
+target:
+  entity_id: switch.chlorinator
+data:
+  timed_percent: 40
+
+# Legacy format (still supported)
+service: omnilogic.set_chlor_timed_percent
+data:
+  entity_id: switch.chlorinator
+  timed_percent: 40
+```
+
+The timed_percent value must be between 0 and 100.
 
 ## Light Platform
 
 The light platform allows you to set the color or effect of your lights from the effect list supported by your light version.
 
-If you have V2 Colorlogic lights you can also set the brightness and speed of the lights using the custom service `omnilogic.set_v2_lights` as following:
+If you have V2 Colorlogic lights you can also set the brightness and speed of the lights using the custom service `omnilogic.set_v2_lights`:
 
 ```yaml
+# Modern format (recommended)
+service: omnilogic.set_v2_lights
+target:
+  entity_id: light.pool_lights
+data:
+  speed: 5
+  brightness: 3
+
+# Legacy format (still supported)
 service: omnilogic.set_v2_lights
 data:
-  entity_id: Entity ID of the Lights
-  speed: Speed (0-8) for the light effect (optional)
-  brightness: Brightness (0-4) for the lights (optional)
+  entity_id: light.pool_lights
+  speed: 5
+  brightness: 3
 ```
+
+Both speed (0-8) and brightness (0-4) parameters are optional.
 
 ## Debugging integration
 
