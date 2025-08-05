@@ -18,8 +18,21 @@ async def async_setup_entry(
 
     coordinator = hass.data[DOMAIN][entry.entry_id][COORDINATOR]
     entities = []
+    
+    # Always create a system-wide alarm sensor, regardless of current alarm state
+    entity = OmniLogicSystemAlarmSensor(
+        coordinator=coordinator,
+        name="System Alarm",
+        icon="mdi:alarm-light",
+    )
+    entities.append(entity)
 
+    # Process equipment-specific alarms
     for item_id, item in coordinator.data.items():
+        # Skip the top-level "Alarms" entry as it's handled separately
+        if item_id == "Alarms":
+            continue
+            
         id_len = len(item_id)
         item_kind = item_id[-2]
         entity_settings = BINARY_SENSOR_TYPES.get((id_len, item_kind))
@@ -84,20 +97,137 @@ class OmniLogicAlarmSensor(OmnilogicSensor, BinarySensorEntity):
     @property
     def is_on(self):
         """Return the state for the alarm sensor."""
-        alarms = len(self.coordinator.data[self._item_id][self._state_key]) > 0
-
-        if alarms:
-            self._attrs["alarm"] = self.coordinator.data[self._item_id][
-                self._state_key
-            ][0]["Message"]
-            self._attrs["alarm_comment"] = self.coordinator.data[self._item_id][
-                self._state_key
-            ][0].get("Comment")
+        # Regular equipment alarm handling
+        if self._state_key in self.coordinator.data[self._item_id]:
+            alarms = len(self.coordinator.data[self._item_id][self._state_key]) > 0
+            if alarms:
+                self._attrs["alarm"] = self.coordinator.data[self._item_id][
+                    self._state_key
+                ][0]["Message"]
+                self._attrs["alarm_comment"] = self.coordinator.data[self._item_id][
+                    self._state_key
+                ][0].get("Comment")
+                self._attrs["alarm_severity"] = self.coordinator.data[self._item_id][
+                    self._state_key
+                ][0].get("Severity")
+            else:
+                self._attrs["alarm"] = "None"
+                self._attrs["alarm_comment"] = ""
+                self._attrs["alarm_severity"] = ""
+            return alarms
         else:
             self._attrs["alarm"] = "None"
             self._attrs["alarm_comment"] = ""
+            self._attrs["alarm_severity"] = ""
+            return False
 
-        return alarms
+
+class OmniLogicSystemAlarmSensor(BinarySensorEntity):
+    """Define an OmniLogic System-wide Alarm Sensor."""
+
+    def __init__(
+        self,
+        coordinator: OmniLogicUpdateCoordinator,
+        name: str,
+        icon: str,
+    ) -> None:
+        """Initialize System Alarm Entity."""
+        self.coordinator = coordinator
+        self._icon = icon
+        self._attrs = {}
+        
+        # Find the first backyard entry to get system ID and name
+        backyard_id = None
+        for item_id in coordinator.data:
+            if isinstance(item_id, tuple) and len(item_id) >= 2:
+                backyard_id = item_id[:2]
+                break
+        
+        if backyard_id and backyard_id in coordinator.data:
+            # Get MSP system ID and backyard name from the data
+            self._msp_system_id = coordinator.data[backyard_id].get("systemId")
+            self._backyard_name = coordinator.data[backyard_id].get("BackyardName", "Omnilogic")
+            
+            # Create a friendly name that includes the backyard name
+            self._name = f"{self._backyard_name} {name}"
+        else:
+            # Fallback if we can't find the backyard data
+            self._msp_system_id = coordinator.config_entry.entry_id
+            self._backyard_name = "Omnilogic"
+            self._name = name
+        
+        # Generate a unique ID for this entity
+        self._attr_unique_id = f"{self._msp_system_id}_system_alarm"
+
+    @property
+    def name(self):
+        """Return the name of the entity."""
+        return self._name
+
+    @property
+    def icon(self):
+        """Return the icon of the entity."""
+        return self._icon
+        
+    @property
+    def device_info(self):
+        """Define the device as back yard/MSP System."""
+        return {
+            "identifiers": {(DOMAIN, self._msp_system_id)},
+            "manufacturer": "Hayward",
+            "model": "OmniLogic",
+            "name": self._backyard_name,
+        }
+
+    @property
+    def should_poll(self) -> bool:
+        """No need to poll. Coordinator notifies entity of updates."""
+        return False
+
+    @property
+    def available(self) -> bool:
+        """Return if entity is available."""
+        return self.coordinator.last_update_success
+
+    async def async_added_to_hass(self) -> None:
+        """When entity is added to hass."""
+        self.async_on_remove(
+            self.coordinator.async_add_listener(self.async_write_ha_state)
+        )
+
+    async def async_update(self) -> None:
+        """Update the entity."""
+        await self.coordinator.async_request_refresh()
+
+    @property
+    def is_on(self):
+        """Return the state for the system alarm sensor."""
+        # Check if the Alarms key exists and has entries
+        if "Alarms" in self.coordinator.data and self.coordinator.data["Alarms"]:
+            alarms = len(self.coordinator.data["Alarms"]) > 0
+            if alarms:
+                self._attrs["alarm"] = self.coordinator.data["Alarms"][0]["Message"]
+                self._attrs["alarm_comment"] = self.coordinator.data["Alarms"][0].get("Comment")
+                self._attrs["alarm_severity"] = self.coordinator.data["Alarms"][0].get("Severity")
+            else:
+                self._attrs["alarm"] = "None"
+                self._attrs["alarm_comment"] = ""
+                self._attrs["alarm_severity"] = ""
+            return alarms
+        else:
+            # No alarms key or empty alarms
+            self._attrs["alarm"] = "None"
+            self._attrs["alarm_comment"] = ""
+            self._attrs["alarm_severity"] = ""
+            return False
+            
+    @property
+    def extra_state_attributes(self):
+        """Return the state attributes."""
+        return self._attrs
+
+
+
 
 
 BINARY_SENSOR_TYPES = {

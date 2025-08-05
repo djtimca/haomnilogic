@@ -2,7 +2,7 @@
   "domain": "omnilogic",
   "name": "Hayward Omnilogic",
   "config_flow": true,
-  "version": "1.4",
+  "version": "1.5",
   "documentation": "https://github.com/djtimca/haomnilogic",
   "requirements": ["omnilogic==0.6.1"],
   "codeowners": ["@oliver84","@djtimca","@gentoosu"],
