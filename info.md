@@ -138,15 +138,15 @@ Both speed (0-8) and brightness (0-4) parameters are optional.
 
 ## Debugging integration
 
-If you have problems with the integration, the first thing we will need to troubleshoot is the telemetry for your pool setup. Please:
+If you have problems with the integration, the first thing we will need to troubleshoot is the telemetry and configuration data for your pool setup. You can easily download this information using Home Assistant's built-in diagnostics feature:
 
-1. Go to: https://replit.com/@djtimca/OmniTesting
-2. Hit the 'Run' button at the top.
-3. Enter your username and password
-4. Hit Enter to clear your credentials
-5. After the script finishes, your file names will be listed in the output (eg. `output_116_5216g89yd5_telemetry.json`, `output_116_2859af29q03_msconfig.xml`, `output_116_c8528gw23y_telemetry.xml`)
-    - Click on the **"Show Files"** on the top left
-    - Look for the respective file and click on it to open and view the content
-        - It may be useful to `CTRL+F` for your file name as the sidebar view cannot be expanded
-    - Copy the telemetry data from the files.
-7. Post your telemetry when you open an issue in this repository as a json/XML code block so we can review and troubleshoot
+1. Go to **Settings** → **Devices & Services** in your Home Assistant dashboard
+2. Find the **Hayward Omnilogic** integration and click on it
+3. Click on the **3-dot menu** in the top-right corner
+4. Select **Download diagnostics**
+5. Save the JSON file to your computer
+
+This file contains all the necessary information for troubleshooting (with sensitive information like system IDs and credentials automatically redacted).
+
+6. When opening an issue on GitHub (https://github.com/djtimca/haomnilogic), attach this diagnostics file to your issue
+7. Include a clear description of the problem you're experiencing
