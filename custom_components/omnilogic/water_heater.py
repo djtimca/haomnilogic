@@ -81,13 +81,11 @@ class OmniLogicHeaterControl(OmniLogicEntity, WaterHeaterEntity):
             "systemId"
         ]
 
-    @property
-    def temperature_unit(self):
+    def _get_temperature_unit(self):
         """Return the unit of measure for the target temp."""
         return UnitOfTemperature.FAHRENHEIT
 
-    @property
-    def target_temperature(self):
+    def _get_target_temperature(self):
         """Return the target temperature."""
         return float(
             self.coordinator.data[self._item_id]["Operation"]["VirtualHeater"][
@@ -131,8 +129,7 @@ class OmniLogicHeaterControl(OmniLogicEntity, WaterHeaterEntity):
         else:
             return STATE_OFF
 
-    @property
-    def current_temperature(self):
+    def _get_current_temperature(self):
         """Return the current water temperature."""
         backyard_id = self._item_id[:2]
         bow_id = self._item_id[:4]
@@ -149,6 +146,15 @@ class OmniLogicHeaterControl(OmniLogicEntity, WaterHeaterEntity):
         self._attrs["hayward_unit_of_measure"] = hayward_unit_of_measure
 
         return temperature
+
+    if hasattr(WaterHeaterEntity, "native_temperature_unit"):
+        native_temperature_unit = property(_get_temperature_unit)
+        native_target_temperature = property(_get_target_temperature)
+        native_current_temperature = property(_get_current_temperature)
+    else:
+        temperature_unit = property(_get_temperature_unit)
+        target_temperature = property(_get_target_temperature)
+        current_temperature = property(_get_current_temperature)
 
     @property
     def state(self):

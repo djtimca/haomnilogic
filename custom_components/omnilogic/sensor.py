@@ -6,9 +6,9 @@ from homeassistant.components.sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
-    CONCENTRATION_PARTS_PER_MILLION,
     UnitOfElectricPotential,
     UnitOfMass,
+    UnitOfRatio,
     PERCENTAGE,
     UnitOfTemperature,
     UnitOfVolume,
@@ -342,7 +342,7 @@ SENSOR_TYPES = {
             "device_class": None,
             "state_class": SensorStateClass.MEASUREMENT,
             "icon": "mdi:gauge",
-            "unit": CONCENTRATION_PARTS_PER_MILLION,
+            "unit": UnitOfRatio.PARTS_PER_MILLION,
             "guard_condition": [
                 {
                     "Shared-Type": "BOW_SHARED_EQUIPMENT",
@@ -357,7 +357,7 @@ SENSOR_TYPES = {
             "device_class": None,
             "state_class": SensorStateClass.MEASUREMENT,
             "icon": "mdi:gauge",
-            "unit": CONCENTRATION_PARTS_PER_MILLION,
+            "unit": UnitOfRatio.PARTS_PER_MILLION,
             "guard_condition": [
                 {
                     "Shared-Type": "BOW_SHARED_EQUIPMENT",
